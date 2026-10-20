@@ -112,21 +112,64 @@ export function useGameController() {
             });
 
             const totalTiles = w * h;
+            // 1. 第一步：先算出所有格子在所有顏色底下的基本地雷數與它自己本該有的初始可見度
             for (let i = 0; i < totalTiles; i++) {
                 const isPuzzleTile = newAnswerGrid[i] !== '#E0E0E0';
                 const actualTileColor = newAnswerGrid[i];
 
-                // 🔄 這裡改用全動態迴圈，保證每隻顏色比對時，targetColor 都能精確對齊自己！
                 activeColors.forEach(targetColor => {
                     const count = calculateAdjacentColorCount(i, targetColor, newAnswerGrid);
                     
                     nextDynamicHints[targetColor].push({
                         number: count,
-                        // 💡 防作弊條件修正：只有是謎題格、算出來是 0、且格子本身的真實答案顏色「不等於目前正在計算的這隻顏色(targetColor)」時，開局才主動亮起！
+                        // 初始條件：是謎題格、算出來是 0、且格子本身的真實答案顏色「不等於目前正在計算的這隻顏色」
                         isVisible: isPuzzleTile && count === 0 && actualTileColor !== targetColor
                     });
                 });
             }
+
+            // 2. 🌟 第二步（核心新增）：發動 0 鄰近 8 格的連鎖安全擴散！
+            activeColors.forEach(targetColor => {
+                const currentLevelColorHints = nextDynamicHints[targetColor];
+                
+                // 我們宣告一個陣列，專門記錄有哪些格子因為鄰近 0 而需要被強制亮起
+                const forceVisibleIndices = new Array(totalTiles).fill(false);
+
+                for (let i = 0; i < totalTiles; i++) {
+                    // 如果這一格在第一步被判定是「開局主動亮起的 0 提示格」
+                    if (currentLevelColorHints[i].isVisible && currentLevelColorHints[i].number === 0) {
+                        
+                        // 巡檢它周圍的九宮格 8 個鄰居
+                        const row = Math.floor(i / w);
+                        const col = i % w;
+
+                        for (let dRow = -1; dRow <= 1; dRow++) {
+                            for (let dCol = -1; dCol <= 1; dCol++) {
+                                if (dRow === 0 && dCol === 0) continue; // 跳過自己
+                                
+                                const newRow = row + dRow;
+                                const newCol = col + dCol;
+
+                                // 確保鄰居沒有越界
+                                if (newRow >= 0 && newRow < h && newCol >= 0 && newCol < w) {
+                                    const neighborIndex = newRow * w + newCol;
+                                    // 只有當鄰居也是謎題格（非外圍透明背景）時，才加入強制亮起清單
+                                    if (newAnswerGrid[neighborIndex] !== '#E0E0E0') {
+                                        forceVisibleIndices[neighborIndex] = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // 最後，把所有被標記為 true 的鄰居格子，其 isVisible 通通洗成 true！
+                for (let i = 0; i < totalTiles; i++) {
+                    if (forceVisibleIndices[i]) {
+                        currentLevelColorHints[i].isVisible = true;
+                    }
+                }
+            });
 
             setAnswerGrid(newAnswerGrid);
             setPlayerGrid(newPlayerGrid);

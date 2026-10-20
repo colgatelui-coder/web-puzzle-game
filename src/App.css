@@ -50,35 +50,52 @@ body {
   }
 }
 
-/* 調色盤樣式 */
+/* 🌟 1. 再次把左側側邊欄黑框微微加寬，給文字完整的生存空間 */
 .palette-section {
-  background-color: #2a2a2a;
+  width: 320px; /* 🎨 從 260px 加寬到 290px */
+  min-width: 320px;
   padding: 20px;
+  background-color: #2a2a2a;
   border-radius: 12px;
-  min-width: 200px;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   gap: 15px;
 }
 
-/* 修改：調色盤列表改為網格佈局，一行顯示兩隻顏色，整齊不佔空間 */
+/* 🌟 2. 調整兩欄並排的網格，微調間距 */
 .color-palette-list {
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* 🌟 自動兩欄並排 */
-  gap: 10px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px; /* 保持適當的間距 */
+  width: 100%;
 }
 
-/* 稍微縮小一下單個項目的 padding，讓 6 個按鈕擺放更精緻 */
+/* 🌟 3. 核心修正：優化每一個選色項目的內部排版 */
 .palette-item {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 10px;
+  align-items: center; /* 讓方塊與文字垂直置中 */
+  justify-content: flex-start;
+  gap: 10px; /* 方塊與文字之間的距離 */
+  padding: 8px 10px;
   background-color: #3a3a3a;
   border-radius: 8px;
   cursor: pointer;
   border: 2px solid transparent;
   transition: background-color 0.2s;
+  box-sizing: border-box;
+}
+/* 🌟 4. 核心修正：強制讓文字不要換行，並對齊排版 */
+.color-count {
+  font-size: 13px;
+  color: #ddd;
+  white-space: nowrap; /* 🛑 關鍵：強制文字絕對不准自動斷行！ */
+  text-align: left;
+  line-height: 1.2;
+}
+.color-count strong {
+  color: #ffbe0b;
+  font-size: 15px; /* 讓數字稍微明顯一點 */
 }
 
 .palette-item:hover {
@@ -92,35 +109,17 @@ body {
   box-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
 }
 
+/* 🌟 5. 確保顏色小方塊大小固定，不被文字擠壓變形 */
 .palette-color {
-  width: 36px;
-  height: 36px;
+  width: 28px;  /* 稍微縮小一點方塊，騰出更多空間給文字 */
+  height: 28px;
+  min-width: 28px; /* 防止被彈性佈局壓縮 */
+  min-height: 28px;
   border: 2px solid #222;
   border-radius: 6px;
   cursor: pointer;
-  pointer-events: none; /* 讓點擊事件由外層的 palette-item 統一處理 */
+  pointer-events: none;
 }
-
-.color-count {
-  font-size: 16px;
-  color: #ddd;
-}
-
-.color-count strong {
-  color: #ffbe0b; /* 讓剩餘數字變成醒目的黃色 */
-  font-size: 18px;
-}
-
-
-.palette-color {
-  width: 60px;
-  height: 60px;
-  border: 3px solid #444;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: transform 0.1s, border-color 0.1s;
-}
-
 .palette-color:hover {
   transform: scale(1.05);
 }
@@ -370,14 +369,22 @@ body {
   pointer-events: none; /* 🛑 徹底從網頁底層鎖死任何點擊事件 */
   opacity: 0.9; /* 微微變暗，營造自動運算感 */
 }
-/* 🌟 教學按鈕與彈窗排版 */
+/* 🌟 1. 修正上方標題文字重疊 */
 .header-top-row {
   display: flex;
-  justify-content: space-between;
+  justify-content: center; /* 改為置中對齊 */
   align-items: center;
+  gap: 15px; /* 讓文字、愛心和關卡字樣之間保持完美的舒適間距 */
   width: 100%;
-  max-width: 800px;
-  margin: 0 auto 10px auto;
+  max-width: 900px;
+  margin: 0 auto 15px auto;
+  position: relative;
+}
+
+/* 如果你的愛心圖標是包在 span 裡，確保它不會擠壓文字 */
+.header-top-row span {
+  display: inline-flex;
+  align-items: center;
 }
 
 .tutorial-toggle-btn {
