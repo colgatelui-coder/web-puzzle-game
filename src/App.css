@@ -1,0 +1,529 @@
+/* 基礎設定 */
+body {
+  margin: 0;
+  font-family: 'PingFang HK', 'Microsoft JhengHei', sans-serif;
+  background-color: #1a1a1a;
+  color: #ffffff;
+}
+
+.game-wrapper {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.game-header {
+  text-align: center;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.status-bar {
+  display: flex;
+  justify-content: space-between;
+  background-color: #2a2a2a;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 18px;
+}
+
+.heart-icon {
+  margin-right: 2px;
+}
+
+/* 主要排版：左右分欄 */
+.game-main {
+  display: flex;
+  gap: 40px;
+  width: 100%;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+@media (max-width: 768px) {
+  .game-main {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+/* 調色盤樣式 */
+.palette-section {
+  background-color: #2a2a2a;
+  padding: 20px;
+  border-radius: 12px;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* 修改：調色盤列表改為網格佈局，一行顯示兩隻顏色，整齊不佔空間 */
+.color-palette-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 🌟 自動兩欄並排 */
+  gap: 10px;
+}
+
+/* 稍微縮小一下單個項目的 padding，讓 6 個按鈕擺放更精緻 */
+.palette-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background-color: #3a3a3a;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: background-color 0.2s;
+}
+
+.palette-item:hover {
+  background-color: #4a4a4a;
+}
+
+/* 當選中時，整個外框亮起來 */
+.palette-item.active-item {
+  border-color: #ffffff;
+  background-color: #444444;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
+}
+
+.palette-color {
+  width: 36px;
+  height: 36px;
+  border: 2px solid #222;
+  border-radius: 6px;
+  cursor: pointer;
+  pointer-events: none; /* 讓點擊事件由外層的 palette-item 統一處理 */
+}
+
+.color-count {
+  font-size: 16px;
+  color: #ddd;
+}
+
+.color-count strong {
+  color: #ffbe0b; /* 讓剩餘數字變成醒目的黃色 */
+  font-size: 18px;
+}
+
+
+.palette-color {
+  width: 60px;
+  height: 60px;
+  border: 3px solid #444;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.1s, border-color 0.1s;
+}
+
+.palette-color:hover {
+  transform: scale(1.05);
+}
+
+.palette-color.active {
+  border-color: #ffffff;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.color-preview {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border: 1px solid #fff;
+  border-radius: 4px;
+}
+
+.restart-btn {
+  padding: 10px;
+  background-color: #4d96ff;
+  border: none;
+  color: white;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.restart-btn:hover {
+  background-color: #357ae8;
+}
+
+/* 核心：24x24 拼圖地圖網格 */
+.board-section {
+  position: relative;
+}
+
+.tile-map-container {
+  position: relative;
+  background-color: #333;
+  padding: 8px;
+  border-radius: 8px;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+}
+
+.tile-map {
+  display: grid;
+  /* 🌟 核心關鍵：建立一個 24x24 的網格，每格大小固定為 18px */
+  grid-template-columns: repeat(24, 18px);
+  grid-template-rows: repeat(24, 18px);
+  gap: 1px; /* 格子微小的間緒，方便辨識 */
+  background-color: #222;
+}
+
+/* 提示數字與雙擊後的排版 */
+.tile-slot {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  user-select: none; /* 防止雙擊時意外選取到網頁文字 */
+}
+
+/* 🌟 修改這裡：移除強制的深灰色背景，改成完全透明，只保留內陰影 */
+.tile-slot.has-hint {
+  background-color: transparent; /* 設定為透明，不遮擋格子的原始色彩 */
+  box-shadow: inset 0 0 3px rgba(0,0,0,0.6); /* 稍微保留微弱內陰影，維持立體踩地雷感（也可直接刪除此行） */
+}
+
+.hint-number {
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1;
+  /* 強烈黑邊，確保不論切換到什麼顏色，數字都極度清晰 */
+  text-shadow: 
+    -1px -1px 0 #000,  
+     1px -1px 0 #000,
+    -1px  1px 0 #000,
+     1px  1px 0 #000;
+}
+
+.tile-slot.hidden {
+  border-radius: 1px;
+}
+
+.tile-slot.hidden:hover {
+  filter: brightness(1.2);
+  outline: 1px solid white;
+  z-index: 10;
+}
+
+/* 結算畫面覆蓋層 */
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-radius: 8px;
+  backdrop-filter: blur(4px);
+  z-index: 100;
+}
+
+.win-overlay {
+  background-color: rgba(46, 125, 50, 0.9);
+}
+
+.lose-overlay {
+  background-color: rgba(198, 40, 40, 0.9);
+}
+
+.overlay h2 {
+  font-size: 32px;
+  margin-bottom: 10px;
+}
+
+.overlay button {
+  padding: 12px 24px;
+  font-size: 18px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  margin-top: 15px;
+}
+
+
+/* 震動與色彩切換的動畫細節 */
+@keyframes shakeAndFlash {
+  0% { transform: translateX(0); filter: brightness(1.5); }
+  20% { transform: translateX(-3px) rotate(-5deg); }
+  40% { transform: translateX(3px) rotate(5deg); }
+  60% { transform: translateX(-2px); }
+  80% { transform: translateX(2px); }
+  100% { transform: translateX(0); filter: brightness(1); }
+}
+/* 🌟 錯誤 ❌ 標誌的精細調整 */
+.error-x-mark {
+  font-size: 11px; /* 配合 18px 的格子大小，縮小圖標 */
+  font-weight: bold;
+  line-height: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* ❌ 彈出的迷你動畫 */
+@keyframes popIn {
+  0% { transform: scale(0); }
+  100% { transform: scale(1); }
+}
+
+/* 🌟 過關時全圖融為一體的無縫像素效果 */
+.tile-slot.won-complete {
+  box-shadow: none !important;
+  transition: background-color 0.5s ease; /* 讓隱藏的顏色在過關瞬間溫柔地亮起來 */
+}
+
+/* 🌟 升級過關滿版覆蓋層：加上華麗的黃金漸層與霧面玻璃質感 */
+.win-overlay {
+  background: linear-gradient(135deg, rgba(255, 190, 11, 0.95), rgba(251, 86, 157, 0.95)) !important;
+  color: #ffffff !important;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 0 30px rgba(255, 190, 11, 0.6);
+  animation: winOverlayFadeIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.win-overlay h2 {
+  font-size: 38px;
+  letter-spacing: 2px;
+  animation: textPop 0.8s infinite alternate;
+}
+
+.win-overlay button {
+  background-color: #ffffff !important;
+  color: #ff569d !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.win-overlay button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* 🌟 動態特效動畫庫 */
+@keyframes winOverlayFadeIn {
+  0% { opacity: 0; transform: scale(0.8); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes textPop {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.05); }
+}
+/* 🌟 核心：外層地圖容器要允許內部放大，並保持平滑 */
+.tile-map-container {
+  overflow: hidden; /* 防止放大時邊緣溢出 */
+}
+
+.tile-map {
+  transition: transform 0.3s ease; /* 平時切換的平滑度 */
+}
+
+/* 🌟 核心修正：將放大動畫掛在整張地圖大外框上 */
+.tile-map.celebrate-zoom {
+  will-change: transform; /* 告訴瀏覽器提前準備硬體加速，保證 3 秒動畫極度滑順、毫不卡頓 */
+  animation: totalMapZoomIn 3s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+/* 🌟 整張圖同步平滑放大與微微提亮的電影感特效 */
+@keyframes totalMapZoomIn {
+  0% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  100% {
+    transform: scale(1.15); /* 整個正方形地圖同步流暢放大 1.15 倍 */
+    filter: brightness(1.2); /* 顏色微微提亮，散發通關神聖感 */
+  }
+}
+
+/* 確保背景絕對透明乾淨 */
+.tile-slot {
+  background-color: #CCCCCC; /* 謎題格未解鎖時預設為未透露的灰色 */
+}
+
+@keyframes zoomAndBrighten {
+  0% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  100% {
+    /* 緩慢放大 1.15 倍，並且讓色彩微微散發光芒（高亮度），營造震撼通關感 */
+    transform: scale(1.15);
+    filter: brightness(1.25);
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+  }
+}
+/* 🌟 自動填色期間，滑鼠游標變成禁止符號，且禁止任何點擊穿透 */
+.tile-map-container.hold-locked {
+  cursor: not-allowed !important;
+  pointer-events: none; /* 🛑 徹底從網頁底層鎖死任何點擊事件 */
+  opacity: 0.9; /* 微微變暗，營造自動運算感 */
+}
+/* 🌟 教學按鈕與彈窗排版 */
+.header-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto 10px auto;
+}
+
+.tutorial-toggle-btn {
+  padding: 8px 16px;
+  background-color: #ffbe0b;
+  border: none;
+  color: #000;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(255, 190, 11, 0.3);
+  transition: transform 0.1s, background-color 0.2s;
+}
+
+.tutorial-toggle-btn:hover {
+  transform: translateY(-1px);
+  background-color: #e6a600;
+}
+
+/* 滿版霧面背景遮罩層 */
+.tutorial-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(5px); /* 背景平滑模糊 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999; /* 確保在最上層 */
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* 教學卡片主體 */
+.tutorial-modal-card {
+  position: relative;
+  background-color: #2a2a2a;
+  border: 2px solid #555;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 550px;
+  max-height: 85vh;
+  overflow-y: auto; /* 超過高度時可滾動滾輪 */
+  padding: 25px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+  animation: slidePop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.tutorial-modal-card h2 {
+  margin-top: 0;
+  font-size: 24px;
+  color: #ffbe0b;
+  text-align: center;
+}
+
+.tutorial-modal-card hr {
+  border: 0;
+  height: 1px;
+  background-color: #444;
+  margin: 15px 0;
+}
+
+/* 內容區排版 */
+.tutorial-content-body {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  text-align: left;
+}
+
+.tutorial-step-item h3 {
+  margin: 0 0 6px 0;
+  font-size: 16px;
+  color: #4d96ff;
+}
+
+.tutorial-step-item p {
+  margin: 0 0 6px 0;
+  font-size: 14px;
+  color: #ddd;
+  line-height: 1.4;
+}
+
+.tutorial-step-item ul {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 13px;
+  color: #bbb;
+}
+
+.tutorial-step-item ul li {
+  margin-bottom: 4px;
+}
+
+/* 大招特殊高亮色 */
+.tutorial-step-item.special-skill {
+  background-color: rgba(255, 190, 11, 0.08);
+  padding: 10px;
+  border-left: 3px solid #ffbe0b;
+  border-radius: 0 6px 6px 0;
+}
+.tutorial-step-item.special-skill h3 {
+  color: #ffbe0b;
+}
+
+/* 右上角關卡關閉 ❌ 按鈕 */
+.modal-close-corner-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+.modal-close-corner-btn:hover {
+  transform: scale(1.15);
+}
+
+/* 底部我知道了按鈕 */
+.modal-confirm-btn {
+  width: 100%;
+  margin-top: 25px;
+  padding: 12px;
+  background-color: #4d96ff;
+  border: none;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.modal-confirm-btn:hover {
+  background-color: #357ae8;
+}
+
+/* 動態特效 */
+@keyframes fadeIn {
+  from { opacity: 0; } to { opacity: 1; }
+}
+@keyframes slidePop {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
